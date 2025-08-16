@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Change this if your Docker Hub repo name is not "comfy-jupyter"
 env:
   IMAGE_NAME: comfy-jupyter
 
@@ -15,6 +16,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Check secrets are present
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+            echo "Missing secret: DOCKERHUB_USERNAME"; exit 1; fi
+          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "Missing secret: DOCKERHUB_TOKEN"; exit 1; fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -35,5 +43,5 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
